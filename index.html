@@ -54,6 +54,18 @@
       font-size: 1rem;
     }
 
+    .input-error {
+      border-color: #e74c3c !important;
+      background-color: #fff5f5;
+    }
+
+    .error-msg {
+      color: #e74c3c;
+      font-size: 0.78rem;
+      margin-top: 4px;
+      display: none;
+    }
+
     input:focus {
       outline: none;
       border-color: #2980b9;
@@ -89,95 +101,129 @@
     <h2>Register</h2>
 
     <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" placeholder="Enter username" />
-      <p class="hint">At least 5 characters. Letters, numbers, _ and - allowed.</p>
-    </div>
+  <label for="username">Username</label>
+  <input type="text" id="username" placeholder="Enter username" />
+  <p class="hint">At least 5 characters. Letters, numbers, _ and - allowed.</p>
+  <p class="error-msg" id="err-username"></p>
+</div>
 
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="Enter password" />
-      <p class="hint">At least 8 characters with uppercase, lowercase, number and symbol.</p>
-    </div>
+<div class="form-group">
+  <label for="password">Password</label>
+  <input type="password" id="password" placeholder="Enter password" />
+  <p class="hint">At least 8 characters with uppercase, lowercase, number and symbol.</p>
+  <p class="error-msg" id="err-password"></p>
+</div>
 
-    <div class="form-group">
-      <label for="age">Age</label>
-      <input type="number" id="age" placeholder="Enter your age" />
-      <p class="hint">Must be between 18 and 110.</p>
-    </div>
+<div class="form-group">
+  <label for="age">Age</label>
+  <input type="number" id="age" placeholder="Enter your age" />
+  <p class="hint">Must be between 18 and 110.</p>
+  <p class="error-msg" id="err-age"></p>
+</div>
 
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="text" id="email" placeholder="example@domain.com" />
-      <p class="hint">Must be in the format abc@def.ghi</p>
-    </div>
+<div class="form-group">
+  <label for="email">Email</label>
+  <input type="text" id="email" placeholder="example@domain.com" />
+  <p class="hint">Must be in the format abc@def.ghi</p>
+  <p class="error-msg" id="err-email"></p>
+</div>
 
     <button class="submit-btn" onclick="validateForm()">Submit</button>
   </div>
 
   <script>
-    function validateForm() {
-      var username = document.getElementById("username").value;
-      var password = document.getElementById("password").value;
-      var age      = document.getElementById("age").value;
-      var email    = document.getElementById("email").value;
+    function showError(inputId, errorId, message) {
+  document.getElementById(inputId).classList.add("input-error");
+  var errEl = document.getElementById(errorId);
+  errEl.textContent = message;
+  errEl.style.display = "block";
+}
 
-      var errors = [];
+function clearErrors() {
+  var inputs = ["username", "password", "age", "email"];
+  inputs.forEach(function(id) {
+    document.getElementById(id).classList.remove("input-error");
+  });
+  var errors = ["err-username", "err-password", "err-age", "err-email"];
+  errors.forEach(function(id) {
+    document.getElementById(id).style.display = "none";
+    document.getElementById(id).textContent = "";
+  });
+}
 
-      // ── Username ──
-      // At least 5 characters, only letters, numbers, _ and -
-      var usernamePattern = /^[a-zA-Z0-9_-]{5,}$/;
-      if (username === "") {
-        errors.push("Username is required.");
-      } else if (!usernamePattern.test(username)) {
-        errors.push("Username must be at least 5 characters and can only contain letters, numbers, _ and -");
-      }
+function validateForm() {
+  clearErrors();
 
-      // ── Password ──
-      // At least 8 chars, must have uppercase, lowercase, number, symbol
-      var hasUpper   = /[A-Z]/.test(password);
-      var hasLower   = /[a-z]/.test(password);
-      var hasNumber  = /[0-9]/.test(password);
-      var hasSymbol  = /[^a-zA-Z0-9]/.test(password);
+  var username = document.getElementById("username").value;
+  var password = document.getElementById("password").value;
+  var age      = document.getElementById("age").value;
+  var email    = document.getElementById("email").value;
 
-      if (password === "") {
-        errors.push("Password is required.");
-      } else if (password.length < 8) {
-        errors.push("Password must be at least 8 characters.");
-      } else if (!hasUpper) {
-        errors.push("Password must contain at least one uppercase letter.");
-      } else if (!hasLower) {
-        errors.push("Password must contain at least one lowercase letter.");
-      } else if (!hasNumber) {
-        errors.push("Password must contain at least one number.");
-      } else if (!hasSymbol) {
-        errors.push("Password must contain at least one symbol.");
-      }
+  var hasError = false;
 
-      // ── Age ──
-      // Must be between 18 and 110
-      if (age === "") {
-        errors.push("Age is required.");
-      } else if (age < 18 || age > 110) {
-        errors.push("Age must be between 18 and 110.");
-      }
+  // ── Username ──
+  var usernamePattern = /^[a-zA-Z0-9_-]+$/;
+  if (username === "") {
+    showError("username", "err-username", "Username is required.");
+    hasError = true;
+  } else if (username.length < 5) {
+    showError("username", "err-username", "Username must be at least 5 characters.");
+    hasError = true;
+  } else if (!usernamePattern.test(username)) {
+    showError("username", "err-username", "Only letters, numbers, _ and - allowed.");
+    hasError = true;
+  }
 
-      // ── Email ──
-      // Must match format abc@def.ghi
-      var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (email === "") {
-        errors.push("Email is required.");
-      } else if (!emailPattern.test(email)) {
-        errors.push("Email must be in the format abc@def.ghi");
-      }
+  // ── Password ──
+  var hasUpper  = /[A-Z]/.test(password);
+  var hasLower  = /[a-z]/.test(password);
+  var hasNumber = /[0-9]/.test(password);
+  var hasSymbol = /[^a-zA-Z0-9]/.test(password);
 
-      // ── Show result ──
-      if (errors.length > 0) {
-        alert("Please fix the following errors:\n\n" + errors.join("\n"));
-      } else {
-        alert("Success! Your form has been submitted.");
-      }
-    }
+  if (password === "") {
+    showError("password", "err-password", "Password is required.");
+    hasError = true;
+  } else if (password.length < 8) {
+    showError("password", "err-password", "Password must be at least 8 characters.");
+    hasError = true;
+  } else if (!hasUpper) {
+    showError("password", "err-password", "Must contain an uppercase letter.");
+    hasError = true;
+  } else if (!hasLower) {
+    showError("password", "err-password", "Must contain a lowercase letter.");
+    hasError = true;
+  } else if (!hasNumber) {
+    showError("password", "err-password", "Must contain a number.");
+    hasError = true;
+  } else if (!hasSymbol) {
+    showError("password", "err-password", "Must contain a symbol.");
+    hasError = true;
+  }
+
+  // ── Age ──
+  if (age === "") {
+    showError("age", "err-age", "Age is required.");
+    hasError = true;
+  } else if (age < 18 || age > 110) {
+    showError("age", "err-age", "Age must be between 18 and 110.");
+    hasError = true;
+  }
+
+  // ── Email ──
+  var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (email === "") {
+    showError("email", "err-email", "Email is required.");
+    hasError = true;
+  } else if (!emailPattern.test(email)) {
+    showError("email", "err-email", "Must be in the format abc@def.ghi");
+    hasError = true;
+  }
+
+  // ── Result ──
+  if (!hasError) {
+    alert("Success! Your form has been submitted.");
+  }
+}
   </script>
 
 </body>
